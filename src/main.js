@@ -25,8 +25,6 @@ function Paddle(ctx) {
 	this.speed = 3.00;
 	this.score = 0;
 	this.draw = function(){
-		console.log("Hello!" + this.x + this.y)
-
 		ctx.fillStyle = "red";
 		ctx.fillRect(this.x, this.y, this.w, this.h);
 
@@ -56,6 +54,11 @@ function drawTable(){
 	ctx.fillstyle = "black";
 	ctx.fillRect(299,0,2,300)
 
+	if (players == 1 && l_bot != true && r_bot != true)
+	{
+		ctx.fillStyle = "white";
+		ctx.fillText("Waiting for players!", 250, 10);
+	}
 
 }
 
@@ -64,6 +67,7 @@ function drawTable(){
 var ball = new Ball(ctx);
 var paddle_r = new Paddle(ctx);
 var paddle_l = new Paddle(ctx);
+var players = 0;
 
 document.addEventListener('keydown', function(event){
 
@@ -126,10 +130,13 @@ function push_moves(socket, left, right)
 	});
 }
 
+socket.emit('setBot', {
+	left: l_bot,
+	right: r_bot
+});
+
 socket.on('board', function (data) {
 	drawTable();
-
-	console.log(data)
 	paddle_l.x = data.left_x;
 	paddle_l.y = data.left_y;
 	paddle_l.score = data.left_score;
@@ -142,6 +149,7 @@ socket.on('board', function (data) {
 	ball.y = data.ball.y;
 	ball.h = data.ball.h;
 	ball.w = data.ball.w;
+	players = data.players;
 
 	paddle_l.draw();
 	paddle_r.draw();
